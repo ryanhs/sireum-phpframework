@@ -234,6 +234,10 @@ if(!class_exists('sDB')){
 			return $this->_db->query($sql);
 		}
 		
+		function error(){
+			return $this->_db->error;
+		}
+		
 		function __construct($dbconfig){
 			if(count($dbconfig) < 4)
 				exit(ERR_MYSQLI_CNF);
