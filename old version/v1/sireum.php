@@ -4,7 +4,7 @@
  * *  Sireum, minipack Ajax-PHP framework   *
  * *                                        *
  * *  Created By:	Ryan H. S.              *
- * *  Version   :	2.0                     *
+ * *  Version   :	1.0                     *
  * ******************************************
  * 
  * running with: 
@@ -20,7 +20,6 @@
 	
  */
 
-define('PHP_VERSION_INVALID', "SIREUM 2.0 can't run.. please upgrade your php version, at least 5.3.0");
 define('ERR_MYSQLI_LIB', "Server error, can't find mysqli class");
 define('ERR_MYSQLI_CNF', "Server error, mysql config not properly assigned");
 define('ERR_MYSQLI_CNT', "Server error, can't connect to mysql server");
@@ -28,67 +27,38 @@ define('CONTROLLER_NOBJECT', "Invoked controller isn't object");
 define('CONTROLLER_NEXISTS', "Controller name isn't class");
 define('HTTP_404', "404- not found");
 
-if (version_compare(PHP_VERSION, '5.3.0', '<'))
-	exit(PHP_VERSION_INVALID);
-	
+
 if(!class_exists('mysqli'))
 	exit(ERR_MYSQLI_LIB);
 
-	
-$mtime = microtime(); 
-$mtime = explode(" ",$mtime); 
-$mtime = $mtime[1] + $mtime[0]; 
-$starttime = $mtime;
-			
 if(!class_exists('SIREUM')){
 	class SIREUM{
-		private $actions;
-		private $dbconfig;
-		public $db;
-		public $view;
+		private $_controller;
 		
-		
-		public function __construct() {
-			$this->view = new view();
-			$this->actions = array();
-			
-			// run all the code in when the php want to shutdown the page
-			register_shutdown_function(array($this, 'run'));
-		}
-		
-		public function setDB($dbconfig){
-			$this->dbconfig = $dbconfig;
+		function __construct($dbconfig, $className){
 			if(is_array($dbconfig))
-				$this->db = sDB::getInstance($dbconfig);
+				sDB::getInstance($dbconfig);
+			
+			if(!class_exists($className))
+				exit(CONTROLLER_NEXISTS);
+			$controller = new $className;
+			
+			if(!is_object($controller))
+				exit(CONTROLLER_NOBJECT);
+			$this->_controller = &$controller;
+			
+			$this->run();
 		}
 		
-		public function add($act, $func) {
-			$this->actions[$act] = $func;
-		}
-		
-		public function run() {
+		function run(){
 			$action = 'index';
 			if(!empty($_GET['act']))
 				$action = $_GET['act'];
-			if(array_key_exists($action, $this->actions))
-				$this->actions[$action]();
-			else
+			if(!method_exists($this->_controller, $action))
 				exit(HTTP_404);
+			
+			$this->_controller->$action();
 		}
-		
-		public function timer() {
-			global $starttime;
-			$mtime = microtime(); 
-			$mtime = explode(" ",$mtime); 
-			$mtime = $mtime[1] + $mtime[0]; 
-			$endtime = $mtime; 
-			$totaltime = ($endtime - $starttime);
-			return number_format($totaltime, 3);
-		}
-		
-		// alias function
-		public function render($view, $data = null, $output = false) { return $this->view->render($view, $data, $output); }
-		public function simple($data, $debug = false) { return $this->view->simple($data, $debug); }
 	}
 }
 
@@ -305,11 +275,6 @@ if(!class_exists('view')){
 		}
 		
 		public function render($view, $data = null, $output = false) {
-			global $sireum;
-			
-			// change to sireum path, usefull for fix bug in register_shutdown_function()
-			chdir(dirname(__FILE__));
-			
 			if(is_file($view . '.php')) {
 				if(is_array($data))
 					extract($data);
@@ -324,13 +289,4 @@ if(!class_exists('view')){
 			return false;
 		}
 	}
-}
-
-
-// auto call sireum
-$sireum = new SIREUM();
-function getInstance()
-{
-	global $sireum;
-	return $sireum;
 }

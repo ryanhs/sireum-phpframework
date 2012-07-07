@@ -1,0 +1,7 @@
+v2.0
+simple framework with use the power of anonymous function.
+anonymous function make the code more beautiful.
+
+v1.0
+first release of sireum php-framework,
+simple framework with basic class to work.

@@ -2,15 +2,13 @@
 
 require '../../sireum.php';
 
-class test{
-	
-	function index(){
-		echo 'this my index';
-	}
-	
-	// test.php?act=somepage
-	function somepage(){
-		echo  'this is some page';
-	}
-	
-}(new SIREUM(null, 'test'));
+// load database module
+$sireum->setDB(array('localhost', 'root', '', 'restaurant'));
+
+$sireum->add('index', function() {
+	echo 'hello world, <a href="test.php?act=db">test db</a>.';
+});
+
+$sireum->add('db', function() use ($sireum){
+	$sireum->view->simple($sireum->db->tables(), true);
+});
