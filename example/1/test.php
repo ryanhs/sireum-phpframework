@@ -3,7 +3,7 @@
 require '../../sireum.php';
 
 // load database module
-$sireum->setDB(array('localhost', 'root', '', 'restaurant'));
+$sireum->enableDB(array('localhost', 'root', '', 'restaurant'));
 
 $sireum->add('index', function() {
 	// use simple echo, for beginner user

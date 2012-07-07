@@ -4,7 +4,7 @@ require '../../sireum.php';
 
 $sireum->add('index', function() use ($sireum){
 	// load database inside action
-	$sireum->setDB(array('localhost', 'root', '', 'restaurant'));
+	$sireum->enableDB(array('localhost', 'root', '', 'restaurant'));
 	
 	$o = $sireum->render('example/2/simpleview', array(
 		'q' => $sireum->db->tables()

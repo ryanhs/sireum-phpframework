@@ -46,6 +46,7 @@ if(!class_exists('SIREUM')){
 		private $dbconfig;
 		public $db;
 		public $view;
+		public $session;
 		
 		
 		public function __construct() {
@@ -56,10 +57,24 @@ if(!class_exists('SIREUM')){
 			register_shutdown_function(array($this, 'run'));
 		}
 		
-		public function setDB($dbconfig){
+		public function enableDB($dbconfig){
 			$this->dbconfig = $dbconfig;
 			if(is_array($dbconfig))
 				$this->db = sDB::getInstance($dbconfig);
+		}
+		
+		public function enableSession($config = array()) {
+			$default = array(
+				'name' => 'sireumCookie',
+				'key' => '123',
+				'expires' => time() + 60*60*24*30*12, // ~12 months
+				'dir' => '/',
+				'site' => '',
+			);
+			
+			$param = array_merge($default, $config);
+			$sess = new session($param['name'], $param['key'], $param['expires'], $param['dir'], $param['site']);
+			$this->session = &$sess->data;
 		}
 		
 		public function add($act, $func) {
@@ -325,6 +340,46 @@ if(!class_exists('view')){
 		}
 	}
 }
+
+if(!class_exists('session')){
+	class session{
+		private $cookie_name;
+		private $cookie_expires;
+		private $cookie_dir;
+		private $cookie_site;
+		
+		private $key;
+		public $data;
+		
+		public function __construct($name, $key, $expires, $dir, $site) {
+			$this->cookie_name = $name;
+			$this->cookie_expires = $expires;
+			$this->cookie_dir = $dir;
+			$this->cookie_site = $site;
+			$this->key = $key;
+			$this->data = (object) (!empty($_COOKIE[$name]) ? json_decode(self::decrypt($this->key, $_COOKIE[$name])) : array());
+			
+			// auto save cookie
+			register_shutdown_function(array($this, 'save'));
+		}
+		
+		private static function encrypt($key, $str) {
+			$encrypted = base64_encode(mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($key), $str, MCRYPT_MODE_CBC, md5(md5($key))));
+			return $encrypted;
+		}
+		
+		private static function decrypt($key, $encrypted) {
+			$decrypted = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, md5($key), base64_decode($encrypted), MCRYPT_MODE_CBC, md5(md5($key))), "\0");
+			return $decrypted;
+		}
+		
+		public function save(){
+			$data = self::encrypt($this->key, json_encode($this->data));
+			setcookie($this->cookie_name, $data, $this->cookie_expires, $this->cookie_dir, $this->cookie_site);
+		}
+	}
+}
+
 
 
 // auto call sireum
