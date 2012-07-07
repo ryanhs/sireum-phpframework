@@ -275,7 +275,7 @@ if(!class_exists('view')){
 		}
 		
 		public function render($view, $data = null, $output = false) {
-			if(file_exists($view . '.php')) {
+			if(is_file($view . '.php')) {
 				if(is_array($data))
 					extract($data);
 				if($output)
