@@ -4,20 +4,8 @@
  * *  Sireum, minipack Ajax-PHP framework   *
  * *                                        *
  * *  Created By:	Ryan H. S.              *
- * *  Version   :	2.0                     *
+ * *  Version   :	2.1                     *
  * ******************************************
- * 
- * running with: 
-	(new B(array('dbhost', 'dbuser', 'dbpass', 'dbname'), 'controllerName'));
-	
- * example:
-	require 'sireum.php';
-	class test{
-		function index(){
-			echo 'hello world!';
-		}
-	}(new SIREUM(null, 'test'));
-	
  */
 
 define('PHP_VERSION_INVALID', "SIREUM 2.0 can't run.. please upgrade your php version, at least 5.3.0");

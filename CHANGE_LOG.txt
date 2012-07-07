@@ -1,3 +1,6 @@
+v2.1
+add session class
+
 v2.0
 simple framework with use the power of anonymous function.
 anonymous function make the code more beautiful.
