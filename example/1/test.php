@@ -6,6 +6,7 @@ require '../../sireum.php';
 $sireum->setDB(array('localhost', 'root', '', 'restaurant'));
 
 $sireum->add('index', function() {
+	// use simple echo, for beginner user
 	echo 'hello world, <a href="test.php?act=db">test db</a>.';
 });
 
