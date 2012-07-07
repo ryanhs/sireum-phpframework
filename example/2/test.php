@@ -4,9 +4,11 @@ require '../../sireum.php';
 
 class test{
 	public $db;
+	public $view;
 	
 	function __construct(){
 		$this->db = sDB::getInstance();
+		$this->view = new view();
 	}
 	
 	function index(){
@@ -14,7 +16,8 @@ class test{
 		//$q = $this->db->tables();
 		
 		while($row = $q->fetch_row()){
-			echo $row['0'] . '<br/>';
+			$this->view->simple($row, true);
+			//echo $row['0'] . '<br/>';
 		}
 	}
 	

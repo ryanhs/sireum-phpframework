@@ -261,3 +261,32 @@ if(!class_exists('sDB')){
 		}
 	}
 }
+
+if(!class_exists('view')){
+	class view{
+		
+		public function simple($data, $debug = false){
+			echo $debug ? '<pre>' : '<p>';
+			if($debug)
+				var_dump($data);
+			else
+				echo is_array($data) ? json_encode($data) : $data;
+			echo $debug ? '</pre>' : '</p>';
+		}
+		
+		public function render($view, $data = null, $output = false) {
+			if(file_exists($view . '.php')) {
+				if(is_array($data))
+					extract($data);
+				if($output)
+					ob_start();
+				require $view . '.php';
+				if($output)
+					return ob_get_clean();
+				else
+					return true;
+			}
+			return false;
+		}
+	}
+}
