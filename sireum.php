@@ -1,19 +1,17 @@
 <?php
 /* 
- * ******************************************
- * *  Sireum, minipack Ajax-PHP framework   *
- * *                                        *
- * *  Created By:	Ryan H. S.              *
- * *  Version   :	2.1                     *
- * ******************************************
+ * ***************************************
+ * *  Sireum, lightweight PHP framework  *
+ * *                                     *
+ * *  Created By:	Ryan H. S.           *
+ * *  Version   :	2.1                  *
+ * ***************************************
  */
 
 define('PHP_VERSION_INVALID', "SIREUM 2.0 can't run.. please upgrade your php version, at least 5.3.0");
 define('ERR_MYSQLI_LIB', "Server error, can't find mysqli class");
 define('ERR_MYSQLI_CNF', "Server error, mysql config not properly assigned");
 define('ERR_MYSQLI_CNT', "Server error, can't connect to mysql server");
-define('CONTROLLER_NOBJECT', "Invoked controller isn't object");
-define('CONTROLLER_NEXISTS', "Controller name isn't class");
 define('HTTP_404', "404- not found");
 
 if (version_compare(PHP_VERSION, '5.3.0', '<'))
@@ -51,11 +49,15 @@ if(!class_exists('SIREUM')){
 				$this->db = sDB::getInstance($dbconfig);
 		}
 		
+		public function enableDatabase($dbconfig){
+			return $this->enableDB($dbconfig);
+		}	
+		
 		public function enableSession($config = array()) {
 			$default = array(
 				'name' => 'sireumCookie',
 				'key' => '123',
-				'expires' => time() + 60*60*24*30*12, // ~12 months
+				'expires' => time() + 60 * 60 * 24 * 30, // ~1 months
 				'dir' => '/',
 				'site' => '',
 			);
@@ -298,6 +300,10 @@ if(!class_exists('sDB')){
 if(!class_exists('view')){
 	class view{
 		
+		public function debug($data) {
+			return $this->simple($data, true);
+		}
+		
 		public function simple($data, $debug = false){
 			echo $debug ? '<pre>' : '<p>';
 			if($debug)
@@ -367,8 +373,6 @@ if(!class_exists('session')){
 		}
 	}
 }
-
-
 
 // auto call sireum
 $sireum = new SIREUM();
