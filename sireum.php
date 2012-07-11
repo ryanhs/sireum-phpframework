@@ -4,7 +4,7 @@
  * *  Sireum, lightweight PHP framework  *
  * *                                     *
  * *  Created By:	Ryan H. S.           *
- * *  Version   :	2.1                  *
+ * *  Version   :	2.2                  *
  * ***************************************
  */
 
@@ -107,6 +107,7 @@ if(!class_exists('sDB')){
 		private $_join = array();
 		private $_where = array();
 		private $_limit = array();
+		private $_order = array();
 		
 		function flushCache(){
 			$this->_select = '*';
@@ -114,6 +115,7 @@ if(!class_exists('sDB')){
 			$this->_join = array();
 			$this->_where = array();
 			$this->_limit = array();
+			$this->_order = array();
 		}
 		
 		function select($select){
@@ -130,6 +132,10 @@ if(!class_exists('sDB')){
 				'foreignKey1' => $foreignKey1,
 				'foreignKey2' => $foreignKey2,
 			);
+		}
+		
+		function orderby($field, $method = "ASC"){
+			$this->_order[$field] = $method;
 		}
 		
 		function where($k, $v){ $this->__where($k, $v, '=', 'AND');}
@@ -177,6 +183,16 @@ if(!class_exists('sDB')){
 					$sql .= "({$where['key']}";
 					$sql .= " {$where['operator']}";
 					$sql .= $where['operator'] == 'LIKE' ? " '{$where['value']}')" : " {$where['value']})";
+					$i++;
+				}
+			}
+			
+			if(count($this->_order) > 0){
+				$sql .= "\n ORDER BY ";
+				$i = 0;
+				foreach($this->_order as $f => $m) {
+					$sql .= $i > 0 ? ", " : '';
+					$sql .= "{$f} {$m}";
 					$i++;
 				}
 			}
