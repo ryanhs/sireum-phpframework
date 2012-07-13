@@ -1,3 +1,7 @@
+v.2.2
+orderby on DB
+mysql connection auto detect between class mysqli or function mysql_connect
+
 v2.1
 add session class
 
