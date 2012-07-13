@@ -1,6 +1,6 @@
-v.2.2
-orderby on DB
-mysql connection auto detect between class mysqli or function mysql_connect
+v2.2
+orderby in DB
+DB support mysqli and mysql_connect, auto detect
 
 v2.1
 add session class
