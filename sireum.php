@@ -8,8 +8,8 @@
  * ***************************************
  */
 
-define('PHP_VERSION_INVALID', "SIREUM 2.0 can't run.. please upgrade your php version, at least 5.3.0");
-define('ERR_MYSQLI_LIB', "Server error, can't find mysqli class");
+define('PHP_VERSION_INVALID', "SIREUM 2.x can't run.. please upgrade your php version, at least 5.3.0");
+define('ERR_MYSQLI_LIB', "Server error, can't find mysqli class/mysql_connect function");
 define('ERR_MYSQLI_CNF', "Server error, mysql config not properly assigned");
 define('ERR_MYSQLI_CNT', "Server error, can't connect to mysql server");
 define('HTTP_404', "404- not found");
@@ -17,7 +17,7 @@ define('HTTP_404', "404- not found");
 if (version_compare(PHP_VERSION, '5.3.0', '<'))
 	exit(PHP_VERSION_INVALID);
 	
-if(!class_exists('mysqli'))
+if(!(class_exists('mysqli') || function_exists('mysql_connect')))
 	exit(ERR_MYSQLI_LIB);
 
 	
@@ -108,6 +108,8 @@ if(!class_exists('sDB')){
 		private $_where = array();
 		private $_limit = array();
 		private $_order = array();
+		
+		private $driver;
 		
 		function flushCache(){
 			$this->_select = '*';
@@ -280,27 +282,46 @@ if(!class_exists('sDB')){
 		function tables(){return $this->query('SHOW TABLES');}
 		function databases(){return $this->query('SHOW DATABASES');}
 		
-		function query($sql){
-			$this->_lastQuery = $sql;
-			return $this->_db->query($sql);
-		}
-		
 		function error(){
 			return $this->_db->error;
+		}
+		
+		function query($sql){
+			$this->_lastQuery = $sql;
+			if($this->driver == 'mysqli')
+				return $this->_db->query($sql);
+			else
+				return mysql_query($sql, $this->_db);
+		}
+		
+		function getDriver(){
+			return $this->driver;
 		}
 		
 		function __construct($dbconfig){
 			if(count($dbconfig) < 4)
 				exit(ERR_MYSQLI_CNF);
-				
-			$this->_db = new mysqli($dbconfig[0], $dbconfig[1], $dbconfig[2], $dbconfig[3]);
-			if ($this->_db->connect_errno)
-				exit(ERR_MYSQLI_CNT);
+			
+			$this->driver = class_exists('mysqli') ? 'mysqli' : 'mysql';
+			
+			if($this->driver == 'mysqli') {
+				$this->_db = new mysqli($dbconfig[0], $dbconfig[1], $dbconfig[2], $dbconfig[3]);
+				if ($this->_db->connect_errno)
+					exit(ERR_MYSQLI_CNT);
+			} else {
+				$this->_db = mysql_connect($dbconfig[0], $dbconfig[1], $dbconfig[2]) or exit(ERR_MYSQLI_CNT);
+				mysql_select_db($dbconfig[3], $this->_db);
+			}
 		}
 		
 		function __destruct(){
-			if(!empty($this->_db))
-				$this->_db->close();
+			if(!empty($this->_db)) {
+				if($this->driver == 'mysqli') {
+					$this->_db->close();
+				} else {
+					mysql_close($this->_db);
+				}
+			}
 		}
 		
 		// for magic calling
