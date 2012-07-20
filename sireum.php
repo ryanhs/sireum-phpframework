@@ -18,7 +18,9 @@ if (version_compare(PHP_VERSION, '5.3.0', '<'))
 	exit(PHP_VERSION_INVALID);
 	
 if(!(class_exists('mysqli') || function_exists('mysql_connect')))
-	
+	exit(ERR_MYSQLI_LIB);
+
+$mtime = 0;	
 $mtime = microtime(); 
 $mtime = explode(" ",$mtime); 
 $mtime = $mtime[1] + $mtime[0]; 
@@ -97,6 +99,8 @@ if(!class_exists('SIREUM')){
 
 if(!class_exists('sDB')){
 	class sDB{
+		private $dbconfig;
+		public $connect_time;
 		private $_db;
 		private $_lastQuery = '';
 		
@@ -297,10 +301,14 @@ if(!class_exists('sDB')){
 		}
 		
 		function __construct($dbconfig){
+			$this->dbconfig = $dbconfig;
 			if(count($dbconfig) < 4)
 				exit(ERR_MYSQLI_CNF);
 			
-			$this->driver = class_exists('mysqli') ? 'mysqli' : 'mysql';
+			if(!empty($dbconfig[4]))
+				$this->driver = $dbconfig[4];
+			else
+				$this->driver = class_exists('mysqli') ? 'mysqli' : 'mysql';
 			
 			if($this->driver == 'mysqli') {
 				$this->_db = new mysqli($dbconfig[0], $dbconfig[1], $dbconfig[2], $dbconfig[3]);
@@ -310,6 +318,7 @@ if(!class_exists('sDB')){
 				$this->_db = mysql_connect($dbconfig[0], $dbconfig[1], $dbconfig[2]) or exit(ERR_MYSQLI_CNT);
 				mysql_select_db($dbconfig[3], $this->_db);
 			}
+			$this->connect_time = time();
 		}
 		
 		function __destruct(){
@@ -320,6 +329,11 @@ if(!class_exists('sDB')){
 					mysql_close($this->_db);
 				}
 			}
+		}
+		
+		function reconnect(){
+			$this->__destruct();
+			$this->__construct($this->dbconfig);
 		}
 		
 		// for magic calling
