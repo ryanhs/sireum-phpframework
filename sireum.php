@@ -31,6 +31,7 @@ if(!class_exists('SIREUM')){
 		private $actions;
 		private $dbconfig;
 		public $db;
+		public $form;
 		public $view;
 		public $session;
 		
@@ -38,6 +39,8 @@ if(!class_exists('SIREUM')){
 		public function __construct() {
 			$this->view = new view();
 			$this->actions = array();
+			
+			$this->form = new form();
 			
 			// run all the code in when the php want to shutdown the page
 			register_shutdown_function(array($this, 'run'));
@@ -431,24 +434,45 @@ if(!class_exists('session')){
 if(!class_exists('form')){
 	class form{
 		private $rules;
+		private $error;
 		
 		public function __construct(){
 			$this->rules = array();
+			$this->error = array();
 		}
 		
 		public function addRule($field, $humanField = null, $rule = '', $method = 'get'){
 			$this->rules[] = array(
 				'field' => $field,
-				'orgin_value' => @$GLOBALS[$method == 'get' ? '_GET' : '_POST'][$field],
+				'method' => $method,
 				'humanField' => $humanField == null ? $field : $humanField,
 				'rule' => $rule,
-				'isValid' => null,
 			);
 		}
 		
 		public function validation(){
-			
+			foreach($this->rules as $k => $rule){
+				foreach(explode('|', $rule['rule']) as $rc){
+					if($rc == 'required'){
+						if($rule['method'] == 'get' && empty($_GET[$rule['field']]))
+							$this->error[] = 'required value on ' . $rule['humanField'];
+						if($rule['method'] == 'post' && empty($_POST[$rule['field']]))
+							$this->error[] = 'required value on ' . $rule['humanField'];
+					}else{
+						if($rule['method'] == 'get')
+							$_GET[$rule['field']] = $rc($_GET[$rule['field']]);
+						else
+							$_POST[$rule['field']] = $rc($_GET[$rule['field']]);
+					}
+				}
+			}
+			return count($this->error) > 0 ? false : true;
 		}
+		
+		public function getError(){
+			return $this->error;
+		}
+		
 	}
 }
 
