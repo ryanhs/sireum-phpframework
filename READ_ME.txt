@@ -7,6 +7,12 @@ sireum created because i want a php framework designed for:
 - easy to use
 
 
+hopefully on next version:
+- refine code
+- more complete form validation
+- caching schema
+
+
 LICENSE
 ---------
 
