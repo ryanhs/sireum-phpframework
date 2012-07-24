@@ -4,7 +4,7 @@
  * *  Sireum, lightweight PHP framework  *
  * *                                     *
  * *  Created By:	Ryan H. S.           *
- * *  Version   :	2.3                  *
+ * *  Version   :	2.4                  *
  * ***************************************
  */
 
@@ -242,7 +242,7 @@ if(!class_exists('sDB')){
 			$i = 0;
 			foreach($this->_set as $k => $v) {
 				$sql .= $i > 0 ? ", " : '';
-				$sql .= "'{$v}'";
+				$sql .= $v == null ? 'null' : "'{$v}'";
 				$i++;
 			}
 			$sql .= ')';
@@ -283,6 +283,11 @@ if(!class_exists('sDB')){
 		
 		function tables(){return $this->query('SHOW TABLES');}
 		function databases(){return $this->query('SHOW DATABASES');}
+		
+		function last_id(){
+			$q = $this->query("SELECT LAST_INSERT_ID();")->fetch_row();
+			return $q['0'];
+		}
 		
 		function error(){
 			return $this->_db->error;
@@ -419,6 +424,30 @@ if(!class_exists('session')){
 		public function save(){
 			$data = self::encrypt($this->key, json_encode($this->data));
 			setcookie($this->cookie_name, $data, $this->cookie_expires, $this->cookie_dir, $this->cookie_site);
+		}
+	}
+}
+
+if(!class_exists('form')){
+	class form{
+		private $rules;
+		
+		public function __construct(){
+			$this->rules = array();
+		}
+		
+		public function addRule($field, $humanField = null, $rule = '', $method = 'get'){
+			$this->rules[] = array(
+				'field' => $field,
+				'orgin_value' => @$GLOBALS[$method == 'get' ? '_GET' : '_POST'][$field],
+				'humanField' => $humanField == null ? $field : $humanField,
+				'rule' => $rule,
+				'isValid' => null,
+			);
+		}
+		
+		public function validation(){
+			
 		}
 	}
 }
