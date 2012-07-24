@@ -1,3 +1,10 @@
+v2.4
+add basic of form validation
+add last insert id in DB class, sDB::getInstance()->last_id();
+
+v2.3
+nothing alot
+
 v2.2
 orderby in DB
 DB support mysqli and mysql_connect, auto detect
